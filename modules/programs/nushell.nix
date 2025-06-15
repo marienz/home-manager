@@ -278,13 +278,16 @@ in
 
       (
         let
+          # Include the plugin names in a plain text file in the output too: plugin.msgpackz is
+          # compressed, so Nix does not see that it refers to the store path of the plugins.
           msgPackz = pkgs.runCommand "nushellMsgPackz" { } ''
-            mkdir -p "$out"
+            mkdir -p "$out/nix-support"
             ${lib.getExe cfg.package} \
               --plugin-config "$out/plugin.msgpackz" \
               --commands '${
                 lib.concatStringsSep "; " (map (plugin: "plugin add ${lib.getExe plugin}") cfg.plugins)
               }'
+            echo '${lib.concatStringsSep "\n" cfg.plugins}' > $out/nix-support/plugin-dependencies
           '';
         in
         lib.mkIf ((cfg.package != null) && (cfg.plugins != [ ])) {
