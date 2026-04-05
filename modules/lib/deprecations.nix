@@ -200,7 +200,7 @@
     '';
     {
       default =
-        if usingLegacyBranch && !deferWarningToConfig then lib.warn warning legacy.value else current.value;
+        if usingLegacyBranch && !deferWarningToConfig && legacy.value != current.value then lib.warn warning legacy.value else current.value;
       defaultText = lib.literalExpression ''
         if lib.versionAtLeast config.home.stateVersion "${since}" then ${currentText} else ${legacyText}
       '';
@@ -209,6 +209,7 @@
       shouldWarn =
         deferWarningToConfig
         && usingLegacyBranch
+        && legacy.value != current.value
         && (
           if lib.isFunction shouldWarn then
             shouldWarn { inherit optionInfo optionUsesDefaultPriority; }
